@@ -20,64 +20,121 @@
                 imgO[i] = new Image();
                 imgO[i].src = picPaths[i];
             }
-
             function swapImage() {
                 curPic = (++curPic > picPaths.length-1)? 0 : curPic;
                 imgCont.src = imgO[curPic].src;
                 setTimeout(swapImage,2000);
             }
-
             window.onload=function() {
                 imgCont = document.getElementById('imgBanner');
                 swapImage();
             }
   </script>
 
-  <!-- water timer script - not working-->
   <script>
-  var time = 0;
-  var running = 0;
+  var Stopwatch = function(elem, options) {
 
-  function startPause() {
-    if(running == 0) {
-      running = 1;
-      increment();
-      document.getElementById("startPause").innerHTML = "Pause";
+    var timer       = createTimer(),
+        startButton = createButton("start", start),
+        stopButton  = createButton("stop", stop),
+        resetButton = createButton("reset", reset),
+        offset,
+        clock,
+        interval;
+
+    // default options
+    options = options || {};
+    options.delay = options.delay || 1;
+
+    // append elements
+    elem.appendChild(timer);
+    elem.appendChild(startButton);
+    elem.appendChild(stopButton);
+    elem.appendChild(resetButton);
+
+    // initialize
+    reset();
+
+    // private functions
+    function createTimer() {
+      return document.createElement("span");
     }
-    else {
-      running = 0;
-      document.getElementById("startPause").innerHTML = "Resume";
+
+    function createButton(action, handler) {
+      var a = document.createElement("a");
+      a.href = "#" + action;
+      a.innerHTML = action;
+      a.addEventListener("click", function(event) {
+        handler();
+        event.preventDefault();
+      });
+      return a;
     }
-  }
 
-  function reset() {
-    running = 0;
-    time = 0;
-    document.getElementById("startPause").innerHTML = "Start";
-    document.getElementById("output").innerHTML = "00:00:00";
-  }
-
-  function increment() {
-    if(running == 1) {
-      setTimeout(function() {
-        time++;
-        var mins = Math.floor(time/10/60);
-        var secs = Math.floor(time/10);
-        var tenths = time % 10;
-
-        if (mins < 10) {
-          mins = "0" + mins;
-        }
-
-        if(secs < 10) {
-          secs = "0" + secs;
-        }
-        document.getElementById("output").innerHTML = mins + ":" + secs + ":" + tenths;
-        increment();
-      },100);
+    function start() {
+      if (!interval) {
+        offset   = Date.now();
+        interval = setInterval(update, options.delay);
+      }
     }
-  }
-  </script>
+
+    function stop() {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    }
+
+    function reset() {
+      clock = 0;
+      render();
+    }
+
+    function update() {
+      clock += delta();
+      render();
+    }
+
+    function render() {
+      timer.innerHTML = clock/1000;
+    }
+
+    function delta() {
+      var now = Date.now(),
+          d   = now - offset;
+
+      offset = now;
+      return d;
+    }
+
+    // public API
+    this.start  = start;
+    this.stop   = stop;
+    this.reset  = reset;
+  };
+</script>
+<script>
+
+(function($) {
+
+  var Stopwatch = function(elem, options) {
+    // code from above...
+  };
+
+  $.fn.stopwatch = function(options) {
+    return this.each(function(idx, elem) {
+      new Stopwatch(elem, options);
+    });
+  };
+})(jQuery);
+
+// all elements with class .stopwatch; default delay (1 ms)
+$(".stopwatch").stopwatch();
+
+// a specific element with id #my-stopwatch; custom delay (10 ms)
+$("#my-stopwatch").stopwatch({delay: 10});
+</script>
+
 <title>The Eco-Friendly Website</title>
 </head>
 
@@ -139,6 +196,25 @@
 
   <h5>Water Timer</h5>
   <!--Link to the timer page-->
+  <div class="stopwatch"></div>
+  <script>
+  var elems = document.getElementsByClassName("stopwatch");
+
+  for (var i=0, len=elems.length; i<len; i++) {
+    new Stopwatch(elems[i]);
+  }
+  var elem = document.getElementById("my-stopwatch");
+  var timer = new Stopwatch(elem, {delay: 10});
+
+  // start the timer
+  timer.start();
+
+  // stop the timer
+  timer.stop();
+
+  // reset the timer
+  timer.reset();
+  </script>
 
   <div>
      <img id="imgBanner" src="saplingbeginning.jpg" alt="Sapling"/>
