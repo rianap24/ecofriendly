@@ -11,25 +11,26 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
   <!-- sapling changing images - from sprout to plant - not workng-->
-  <script type = "text/javascript">
-    function displayNextImage() {
-      x = (x === images.length - 1) ? 0 : x + 1;
-      document.getElementById("img").src = images[x];
-    }
+  <script type="text/javascript">
+            var picPaths = ["saplingbeginning.jpg", "saplingmiddle.jpg", "saplingend.jpg",];
+            var curPic = -1;
+            //preload the images for smooth animation
+            var imgO = new Array();
+            for(i=0; i < picPaths.length; i++) {
+                imgO[i] = new Image();
+                imgO[i].src = picPaths[i];
+            }
 
-    function displayPreviousImage() {
-      x = (x <= 0) ? images.length - 1 : x - 1;
-      document.getElementById("img").src = images[x];
-    }
+            function swapImage() {
+                curPic = (++curPic > picPaths.length-1)? 0 : curPic;
+                imgCont.src = imgO[curPic].src;
+                setTimeout(swapImage,2000);
+            }
 
-    function startTimer() {
-      setInterval(displayNextImage, 3000);
-    }
-
-    var images = [], x = -1;
-    images[0] = "saplingbeginning.jpg";
-    images[1] = "saplingmiddle.jpg";
-    images[2] = "saplingend.jpg";
+            window.onload=function() {
+                imgCont = document.getElementById('imgBanner');
+                swapImage();
+            }
   </script>
 
   <!-- water timer script - not working-->
